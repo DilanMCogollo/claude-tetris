@@ -1,0 +1,117 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Evita bucles y ejecuciones disparadas por bots
+    if: |
+      github.event.issue.user.type != 'Bot' &&
+      github.actor != 'github-actions[bot]' &&
+      github.actor != 'claude[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Asegurar labels del repositorio
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          create() { gh label create "$1" --color "$2" --description "$3" --repo "$REPO" --force; }
+          # Tipo
+          create "bug"               "d73a4a" "Algo no funciona como debería"
+          create "enhancement"       "a2eeef" "Nueva funcionalidad o mejora"
+          create "documentation"     "0075ca" "Mejoras o adiciones a la documentación"
+          create "question"          "d876e3" "Pregunta o solicitud de información"
+          # Área
+          create "area:gameplay"     "1d76db" "Lógica del juego: piezas, colisiones, rotación, líneas"
+          create "area:rendering"    "5319e7" "Dibujo en canvas: tablero, ghost, siguiente pieza"
+          create "area:controles"    "0e8a16" "Teclado e input del jugador"
+          create "area:ui"           "fbca04" "HUD, overlay, HTML/CSS"
+          create "area:puntuacion"   "c5def5" "Puntaje, líneas, niveles y velocidad"
+          create "area:ci"           "bfdadc" "GitHub Actions y automatización"
+          # Prioridad
+          create "prioridad:alta"    "b60205" "Bloquea el juego o es crítico"
+          create "prioridad:media"   "d93f0b" "Importante pero no bloqueante"
+          create "prioridad:baja"    "e4e669" "Menor o cosmético"
+          # Extra
+          create "necesita-info"     "ededed" "Falta información para diagnosticar"
+
+      - name: Analizar issue con Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: '--allowedTools "Bash(gh label list:*),Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Read,Write,Glob,Grep"'
+          prompt: |
+            Eres el asistente de triage del repositorio ${{ github.repository }}, un Tetris en JavaScript vanilla
+            sobre HTML5 Canvas (`index.html`, `style.css`, `game.js`). Lee `CLAUDE.md` para entender la arquitectura.
+
+            Issue a analizar: #${{ github.event.issue.number }}
+            Evento: ${{ github.event.action }} (opened = issue nuevo, edited = el autor editó título o cuerpo)
+
+            Pasos:
+            1. Lee el issue: `gh issue view ${{ github.event.issue.number }} --repo ${{ github.repository }} --json title,body,labels,author`
+            2. Lista los labels disponibles: `gh label list --repo ${{ github.repository }} --limit 100`
+            3. Revisa el código relevante (`game.js`, `index.html`, `style.css`, `.github/workflows/`) para entender
+               el problema. Cita funciones y líneas concretas.
+            4. Asigna labels SOLO de la lista existente (no crees labels nuevos):
+               - Exactamente un label de tipo: bug, enhancement, documentation o question.
+               - Uno o más labels `area:*` que correspondan.
+               - Exactamente un label `prioridad:*`.
+               - `necesita-info` si el issue no tiene datos suficientes para diagnosticar.
+               Usa `gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --add-label "..."`.
+               Si el evento es `edited`, quita con `--remove-label` los labels de tipo/área/prioridad/necesita-info
+               que ya no apliquen. No toques otros labels.
+            5. Escribe el diagnóstico en el archivo `/tmp/diagnostico.md` y publícalo con:
+               `gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --edit-last --create-if-none --body-file /tmp/diagnostico.md`
+               (así, en ediciones del issue se actualiza el mismo comentario en lugar de duplicarlo).
+
+            Formato del comentario (en español, markdown):
+
+            ## 🔍 Diagnóstico automático
+            **Resumen:** una o dos frases sobre qué reporta o pide el issue.
+
+            ### Clasificación
+            Labels asignados y justificación breve de cada uno.
+
+            ### Causa probable
+            Para bugs: hipótesis de la causa raíz. Para mejoras: qué falta o qué hay que cambiar.
+
+            ### Código implicado
+            Lista de `archivo:línea` y funciones relevantes, con una línea explicando su rol.
+
+            ### Enfoque de solución sugerido
+            Pasos concretos y ordenados para implementar la solución, suficientes para que un desarrollador
+            (o Claude) pueda escribir el código después.
+
+            ### Información faltante
+            Preguntas al autor, si las hay. Si no falta nada, escribe "Ninguna".
+
+            ### Riesgos y consideraciones
+            Efectos colaterales, casos borde, cosas a verificar manualmente al probar.
+
+            ---
+            _Diagnóstico generado automáticamente por Claude. Se actualiza al editar el issue._
+
+            Reglas:
+            - No modifiques código, no crees ramas ni PRs.
+            - No cierres el issue ni edites su título o cuerpo.
+            - Si el issue es spam o no tiene relación con el proyecto, asigna solo `question` y `necesita-info`
+              y explícalo brevemente en el comentario.
