@@ -1,4 +1,4 @@
-c;# CLAUDE.md
+# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -30,6 +30,9 @@ Everything lives in one script with module-level mutable state (`board`, `curren
 - **Rendering**: `draw()` redraws the entire board each frame (`clearCanvas` → grid → locked cells → ghost at `alpha 0.2` → current piece). `drawNext()` is called from `spawn()` and when theme/skin change. The HUD (`updateHUD`) is DOM-based, not canvas.
 - **Skins** (`// ---- Skins ----` section): `SKINS = { retro, neon, pastel, pixel }`, each with `name` (Spanish label, used to populate `#skin-select`), `colors` (per-skin palette indexed like `COLORS`; `COLORS` is now only the Retro palette), optional `boardBg` (painted by `clearCanvas`; otherwise the canvas stays transparent so CSS `--board-bg` shows — Neon forces black in both themes), optional `grid` (fallback CSS `--grid`), and `drawBlock(context, x, y, colorIndex, size, alpha)`. The global `drawBlock` keeps its signature, delegates to the active `skin` and wraps the call in `save()/restore()` so `shadowBlur`/`globalAlpha` never leak. `setSkin(id)` validates (invalid → `retro`), persists to `localStorage` key `tetris-skin` and redraws if `current && next`. The select's own `keydown` stops propagation so focused-select keys don't drive the game.
 - **Scoring**: `LINE_SCORES[cleared] * level`; soft drop +1/row, hard drop +2/row. Level = `max(gameStartLevel, floor(lines / 10) + 1)`; `dropInterval = intervalForLevel(level)` = `max(100, 1000 − (level − 1) × 90)`. `startLevel` (1–10) is chosen in the pause menu, persisted in `localStorage` (`tetris-start-level`), and snapshotted by `init()` into `gameStartLevel` (`level = gameStartLevel`, `lines = 0`), so changing it mid-game only takes effect on the next game.
+- **Start screen**: on load the script does NOT call `init()`; it shows `#start-screen` (its own `.overlay`) with the records. `started` stays `false` (no loop, no game input; only `T` and `Enter`) until "Jugar"/Enter calls `init()`.
+- **Combo**: `clearLines()` calls `registerCombo(cleared)`; `combo` = consecutive locks that clear ≥1 line (reset to 0 on a lock that clears nothing), `maxCombo` = best of the current game.
+- **Records** (`// ---- Records ----` section): top 5 in `localStorage['tetris-records']` (`[{name, score, lines, level, date}]`) and `localStorage['tetris-stats']` (`{bestCombo, maxLines}`). Small hooks connect it to the game: `onGameStartRecords()` in `init()`, `onGameOverRecords()` in `endGame()` (updates stats, shows `#gameover-records` and the name input if `score > 0` enters the top), `recordsKeyGuard(e)` at the top of the keydown handler (swallows every key while `#player-name` has focus, and pre-start keys). Data read from storage is sanitized in `loadRecords`/`loadStats` (bad JSON → empty); names are rendered with `textContent`. Restarting with an unsaved qualifying score saves it with the name currently typed.
 
 ## Gotchas
 

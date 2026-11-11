@@ -55,6 +55,19 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="gameover-records" class="records hidden">
+          <p id="new-record-msg" class="records-msg"></p>
+          <div id="new-record-form" class="records-form hidden">
+            <input id="player-name" type="text" maxlength="12" value="Jugador" autocomplete="off" spellcheck="false" aria-label="Nombre del jugador" />
+            <button id="save-record-btn" type="button">Guardar</button>
+          </div>
+          <table class="records-table">
+            <thead><tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Líneas</th></tr></thead>
+            <tbody id="gameover-records-body"></tbody>
+          </table>
+          <p id="gameover-stats" class="records-stats"></p>
+          <button type="button" class="reset-records-btn">Borrar records</button>
+        </div>
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>
@@ -78,6 +91,21 @@
           <select id="start-level"></select>
         </label>
         <p class="pause-hint">Se aplica al reiniciar o en la próxima partida</p>
+      </div>
+    </div>
+
+    <!-- ---- Pantalla de inicio / Records ---- -->
+    <div id="start-screen" class="overlay hidden">
+      <div class="overlay-box records">
+        <p class="records-title">RECORDS</p>
+        <table class="records-table">
+          <thead><tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Líneas</th></tr></thead>
+          <tbody id="start-records-body"></tbody>
+        </table>
+        <p id="start-stats" class="records-stats"></p>
+        <button id="play-btn" type="button">Jugar</button>
+        <p class="records-hint">o pulsa <kbd>Enter</kbd></p>
+        <button type="button" class="reset-records-btn">Borrar records</button>
       </div>
     </div>
   </div>
