@@ -8,7 +8,12 @@
 </head>
 <body>
   <h1 class="game-title">TETRIS 935</h1>
-  <button id="theme-toggle" type="button" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema (T)">☀️ Modo claro</button>
+  <div class="top-bar">
+    <button id="theme-toggle" type="button" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema (T)">☀️ Modo claro</button>
+    <label class="skin-picker" for="skin-select">Skin
+      <select id="skin-select" title="Cambiar apariencia de los bloques"></select>
+    </label>
+  </div>
   <div class="wrapper">
     <div class="game-container">
       <canvas id="board" width="300" height="600"></canvas>
