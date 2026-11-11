@@ -33,4 +33,4 @@ Everything lives in one script with module-level mutable state (`board`, `curren
 
 - Canvas size in `index.html` (`300×600`, and `120×120` for `#next-canvas`) is hardcoded and must match `COLS × BLOCK` / `ROWS × BLOCK` if those constants change.
 - `togglePause()` shows the overlay when pausing but does not hide it when resuming.
-- `endGame()` cancels the animation frame, but when triggered from inside `loop()` (via `lockPiece`), `loop` schedules a new frame afterward, so the loop keeps running after game over (input is blocked by the `gameOver` flag).
+- `endGame()` can fire inside `loop()` (via `lockPiece`), after which cancelling `animId` is not enough; `loop` checks `gameOver` before scheduling the next frame so it stops.
