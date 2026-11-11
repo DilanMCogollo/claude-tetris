@@ -217,3 +217,161 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Records / pantalla de inicio ---- */
+.records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.records.hidden,
+.records-form.hidden {
+  display: none;
+}
+
+.records-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.records-msg {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.records-msg:empty {
+  display: none;
+}
+
+.records-form {
+  display: flex;
+  gap: 6px;
+}
+
+#player-name {
+  width: 140px;
+  background: var(--board-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  user-select: text;
+}
+
+#player-name:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+#save-record-btn,
+#play-btn {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+#save-record-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+#play-btn {
+  margin-top: 4px;
+  padding: 10px 36px;
+  font-size: 15px;
+}
+
+#save-record-btn:hover,
+#play-btn:hover {
+  background: var(--accent-hover);
+}
+
+.records-table {
+  border-collapse: collapse;
+  min-width: 260px;
+  font-size: 12px;
+  background: var(--board-bg);
+  border: 1px solid var(--border);
+}
+
+.records-table th {
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: var(--label);
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.records-table td {
+  padding: 4px 8px;
+  color: var(--text);
+  text-align: left;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records-table td:nth-child(1),
+.records-table td:nth-child(4) {
+  text-align: center;
+  color: var(--muted);
+}
+
+.records-table td:nth-child(3) {
+  text-align: right;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.records-table tr.records-highlight td {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.records-table td.records-empty {
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  padding: 10px 8px;
+}
+
+.records-stats {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.records-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.reset-records-btn {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reset-records-btn:hover {
+  background: var(--danger);
+  color: var(--accent-contrast);
+}

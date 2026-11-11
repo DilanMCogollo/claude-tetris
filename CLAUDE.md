@@ -28,6 +28,9 @@ Everything lives in one script with module-level mutable state (`board`, `curren
 - **Loop**: `requestAnimationFrame` loop accumulates `dt` into `dropAccum` and drops one row when it exceeds `dropInterval`. Pause/game over work by cancelling `animId`; resuming resets `lastTime` and calls `loop` directly.
 - **Rendering**: `draw()` redraws the entire board each frame (grid → locked cells → ghost at `alpha 0.2` → current piece). `drawNext()` is only called from `spawn()`. The HUD (`updateHUD`) is DOM-based, not canvas.
 - **Scoring**: `LINE_SCORES[cleared] * level`; soft drop +1/row, hard drop +2/row. Level = `floor(lines / 10) + 1`; `dropInterval = max(100, 1000 − (level − 1) × 90)`.
+- **Start screen**: on load the script does NOT call `init()`; it shows `#start-screen` (its own `.overlay`) with the records. `started` stays `false` (no loop, no game input; only `T` and `Enter`) until "Jugar"/Enter calls `init()`.
+- **Combo**: `clearLines()` calls `registerCombo(cleared)`; `combo` = consecutive locks that clear ≥1 line (reset to 0 on a lock that clears nothing), `maxCombo` = best of the current game.
+- **Records** (`// ---- Records ----` section): top 5 in `localStorage['tetris-records']` (`[{name, score, lines, level, date}]`) and `localStorage['tetris-stats']` (`{bestCombo, maxLines}`). Small hooks connect it to the game: `onGameStartRecords()` in `init()`, `onGameOverRecords()` in `endGame()` (updates stats, shows `#gameover-records` and the name input if `score > 0` enters the top), `recordsKeyGuard(e)` at the top of the keydown handler (swallows every key while `#player-name` has focus, and pre-start keys). Data read from storage is sanitized in `loadRecords`/`loadStats` (bad JSON → empty); names are rendered with `textContent`. Restarting with an unsaved qualifying score saves it with the name currently typed.
 
 ## Gotchas
 
